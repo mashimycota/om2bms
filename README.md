@@ -40,11 +40,11 @@ python om2bms.py -i sample_osu_file.osu
 To view help, run
 
 ```
-python3 om2bms_osz.py -h
+python om2bms_osz.py -h
 ```
 
 ```
-python3 om2bms.py -h
+python om2bms.py -h
 ```
 
 
