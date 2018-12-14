@@ -18,7 +18,7 @@ Set the default output directory by running,
 python om2bms_osz.py -sdo [OUTPUT DIRECTORY]
 ```
 
-or go to `default_outdir.ini` and paste a subdirectory to the a songfolder directory.
+or go to `default_outdir.ini` and paste the path to a subdirectory in a BMS songfolder directory.
 
 ### Running
 Run
