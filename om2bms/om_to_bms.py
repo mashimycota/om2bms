@@ -227,20 +227,21 @@ class OsuManiaToBMSParser:
                 self.write_buffer(bms_measure0)
                 bms_measure.create_measure_length_change(first_timing.meter / 4)
         self.write_buffer(bms_measure)
-
-        self.initialize_mtnv()
-
-        first_measure_time = int(start_time)
-        if first_object.time < first_measure_time - 1:
-            measure_offset -= 1
-            first_measure_time -= ms_per_measure
-        # first_measure_time = start_time_offset
         if first_timing.meter != 4:
             for i in range(1, measure_offset):
                 bms_measure = BMSMeasure(str(i).zfill(3))
                 bms_measure.create_measure_length_change(first_timing.meter / 4)
                 self.write_buffer(bms_measure)
 
+        first_measure_time = int(start_time)
+        if first_object.time < first_measure_time - 1:
+            measure_offset -= 1
+            first_measure_time -= ms_per_measure
+        if time_value_ratio == 0 and not mus_start_at_001:
+            while not self.within_2_ms(start_time, measure_offset * ms_per_measure):
+                measure_offset += 1
+
+        self.initialize_mtnv()
         return (measure_offset, first_measure_time)
 
     def get_next_measure(self, starting_measure: int, starting_ms: int, beatmap: OsuMania):
