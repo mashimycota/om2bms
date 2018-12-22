@@ -142,6 +142,13 @@ class OsuBeatmapReader:
             tp = OsuTimingPoint()
             tp.time = int(float(line_separated[0]))
             tp.inherited = True if int(line_separated[6]) == 0 else False
+            tp.meter = int(line_separated[2])
+            tp.sample_set = int(line_separated[3])
+            tp.sample_index = int(line_separated[4])
+            tp.volume = int(line_separated[5])
+            tp.kiai_mode = False if line_separated[7] == 0 else True
+            if len(beatmap.timing_points) > 0 and tp.time <= beatmap.timing_points[-1].time + 1:
+                del beatmap.timing_points[-1]
             if tp.inherited:
                 tp.ms_per_beat = get_ms_per_beat(float(line_separated[1]), beatmap)
             else:
@@ -149,12 +156,9 @@ class OsuBeatmapReader:
                 bpm = calculate_bpm(tp)
                 if isinstance(bpm, float) or bpm > 255:
                     beatmap.parse_float_bpm(bpm)
+                if len(beatmap.timing_points) > 0 and tp.time <= beatmap.noninherited_tp[-1].time + 1:
+                    del beatmap.noninherited_tp[-1]
                 beatmap.noninherited_tp.append(tp)
-            tp.meter = int(line_separated[2])
-            tp.sample_set = int(line_separated[3])
-            tp.sample_index = int(line_separated[4])
-            tp.volume = int(line_separated[5])
-            tp.kiai_mode = False if line_separated[7] == 0 else True
             beatmap.timing_points.append(tp)
 
         def header_events(line, beatmap):

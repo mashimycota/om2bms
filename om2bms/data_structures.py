@@ -43,6 +43,9 @@ class OsuMania:
         """
         aa
         """
+        for e in OsuMania.float_bpm:
+            if e[1] == bpm:
+                return
         OsuMania.float_bpm.append((get_current_hs_count(len(OsuMania.float_bpm) + 1), bpm))
 
 
