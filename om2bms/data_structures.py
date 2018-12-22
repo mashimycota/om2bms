@@ -244,7 +244,7 @@ class BMSMeasure:
         """
         Channel 3 bpm change (ints only), 01 - FF(255)
         """
-        self.lines.append(BMSMainDataLine("03", 1, {0: str(hex(bpm))[2:4].upper()}, [0], self.measure_number))
+        self.lines.append(BMSMainDataLine("03", 1, {0: str(hex(bpm))[2:4].upper().zfill(2)}, [0], self.measure_number))
 
     def create_bpm_extended_change_line(self, bpm: Union[int, float]):
         """
