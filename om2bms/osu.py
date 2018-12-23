@@ -263,6 +263,7 @@ class OsuBeatmapReader:
             elif line_property[0] == "TitleUnicode":
                 try:
                     beatmap.title_unicode = line_property[1].strip().encode("shiftjis")
+                    beatmap.title_unicode = line_property[1].strip()
                 except UnicodeEncodeError:
                     beatmap.title_unicode = beatmap.title
             elif line_property[0] == "Artist":
@@ -270,6 +271,7 @@ class OsuBeatmapReader:
             elif line_property[0] == "ArtistUnicode":
                 try:
                     beatmap.artist_unicode = line_property[1].strip().encode("shiftjis")
+                    beatmap.artist_unicode = line_property[1].strip()
                 except UnicodeEncodeError:
                     beatmap.artist_unicode = beatmap.artist
             elif line_property[0] == "Creator":
