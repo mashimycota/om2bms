@@ -109,13 +109,14 @@ if __name__ == "__main__":
                     continue
 
         for f in os.listdir(unzip_dir):
-            if not f.split(".")[-1] == "zip" and not f.split(".")[-1] == "osu":
-                full_path = os.path.join(unzip_dir, f)
-                try:
-                    shutil.copy2(full_path, output_file_dir)
-                except PermissionError as e:
-                    print(e)
-                    continue
+            if not os.path.isdir(os.path.join(unzip_dir, f)):
+                if not f.split(".")[-1] == "zip" and not f.split(".")[-1] == "osu":
+                    full_path = os.path.join(unzip_dir, f)
+                    try:
+                        shutil.copy2(full_path, output_file_dir)
+                    except PermissionError as e:
+                        print(e)
+                        continue
 
         print("Done")
         exit(0)
