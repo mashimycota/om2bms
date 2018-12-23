@@ -63,7 +63,7 @@ class OsuManiaToBMSParser:
 
         bms_filename = self.beatmap.title + " " + self.beatmap.version + ".bms"
         output = os.path.join(out_dir, bms_filename)
-        OsuManiaToBMSParser._out_file = codecs.open(output, "w", "shiftjis")
+        OsuManiaToBMSParser._out_file = codecs.open(output, "w", "shiftjis", errors="replace")
 
         self.write_buffer(self.create_header(self.beatmap))
         music_start_param = self.music_start_time(self.beatmap)
