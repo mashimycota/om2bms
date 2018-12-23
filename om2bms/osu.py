@@ -261,11 +261,17 @@ class OsuBeatmapReader:
             if line_property[0] == "Title":
                 beatmap.title = line_property[1].strip().replace("/", "").replace("\\", "")
             elif line_property[0] == "TitleUnicode":
-                beatmap.title_unicode = line_property[1].strip()
+                try:
+                    beatmap.title_unicode = line_property[1].strip().encode("shiftjis")
+                except UnicodeEncodeError:
+                    beatmap.title_unicode = beatmap.title
             elif line_property[0] == "Artist":
                 beatmap.artist = line_property[1].strip()
             elif line_property[0] == "ArtistUnicode":
-                beatmap.artist_unicode = line_property[1].strip()
+                try:
+                    beatmap.artist_unicode = line_property[1].strip().encode("shiftjis")
+                except UnicodeEncodeError:
+                    beatmap.artist_unicode = beatmap.artist
             elif line_property[0] == "Creator":
                 beatmap.creator = line_property[1].strip()
             elif line_property[0] == "Version":
