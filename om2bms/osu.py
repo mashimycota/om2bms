@@ -359,15 +359,15 @@ class OsuBeatmapReader:
         osumania_beatmap.objects = sorted(osumania_beatmap.hit_objects +
                                           osumania_beatmap.sample_objects +
                                           osumania_beatmap.noninherited_tp,
-                                          key=lambda x: x.time)
+                                          key=lambda x: (x.time, x.sort_type))
 
-        for i in range(len(osumania_beatmap.objects)):
-            if isinstance(osumania_beatmap.objects[i], OsuTimingPoint):
-                j = i
-                while osumania_beatmap.objects[j].time == osumania_beatmap.objects[i].time:
-                    j -= 1
-                j += 1
-                osumania_beatmap.objects[j], osumania_beatmap.objects[i], = \
-                    osumania_beatmap.objects[i], osumania_beatmap.objects[j]
+        # for i in range(len(osumania_beatmap.objects)):
+        #     if isinstance(osumania_beatmap.objects[i], OsuTimingPoint):
+        #         j = i
+        #         while osumania_beatmap.objects[j].time == osumania_beatmap.objects[i].time:
+        #             j -= 1
+        #         j += 1
+        #         osumania_beatmap.objects[j], osumania_beatmap.objects[i], = \
+        #             osumania_beatmap.objects[i], osumania_beatmap.objects[j]
 
         file.close()

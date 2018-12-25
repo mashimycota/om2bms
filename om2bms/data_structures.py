@@ -63,8 +63,10 @@ class OsuTimingPoint:
 
         self.ms_per_measure = None
 
+        self.sort_type = 0  # for sorting
+
     def __repr__(self):
-        return str(self.time)
+        return str(self.time) + "ms at " + str(self.ms_per_beat) + "ms_per_beat"
 
     def __eq__(self, other):
         return self.ms_per_beat == other.ms_per_beat and self.meter == other.meter and \
@@ -86,6 +88,8 @@ class SoundEvent:
 
     def __init__(self):
         self.index = None
+
+        self.sort_type = 1  # for sorting
 
     def build_filename(self, custom_index: int, sample_set: int, hitsound: int) -> str:
         """
@@ -156,6 +160,8 @@ class OsuHitObject:
         self.mania_column = None
 
         self.timing_point = None
+
+        self.sort_type = 1  # for sorting
 
 
 class OsuManiaNote(OsuHitObject):
