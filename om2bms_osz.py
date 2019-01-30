@@ -4,6 +4,7 @@ import shutil
 
 from argparse import ArgumentParser
 from om2bms.exceptions import BMSMaxMeasuresException
+from om2bms.image_resizer import black_background_thumbnail
 
 import om2bms.om_to_bms
 
@@ -99,15 +100,27 @@ if __name__ == "__main__":
         if not os.path.isdir(output_file_dir):
             os.makedirs(output_file_dir)
 
+        # convert beatmap
+        bg_list = []
         for file in os.listdir(unzip_dir):
             if file.endswith(".osu"):
                 filedir = os.path.join(unzip_dir, file)
                 try:
-                    om2bms.om_to_bms.OsuManiaToBMSParser(filedir, output_file_dir, file)
+                    convert = om2bms.om_to_bms.OsuManiaToBMSParser(filedir, output_file_dir, file)
+                    bg_list.append(convert.get_bg())
                 except BMSMaxMeasuresException as e:
                     print(e)
                     continue
 
+        # convert bg
+        if args.hitsound:
+            seen = []
+            for bg in bg_list:
+                if bg is not None and bg not in seen:
+                    black_background_thumbnail(bg)
+                    seen.append(bg)
+
+        # move files to output directory
         for f in os.listdir(unzip_dir):
             if not os.path.isdir(os.path.join(unzip_dir, f)):
                 if not f.split(".")[-1] == "zip" and not f.split(".")[-1] == "osu":

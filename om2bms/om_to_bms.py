@@ -6,7 +6,7 @@ from fractions import Fraction
 from math import gcd
 from functools import reduce
 
-import om2bms.image_resizer
+# import om2bms.image_resizer
 from om2bms.data_structures import OsuMania
 from om2bms.data_structures import OsuTimingPoint
 from om2bms.data_structures import OsuManiaNote
@@ -50,6 +50,7 @@ class OsuManiaToBMSParser:
 
     def __init__(self, in_file, out_dir, filename):
         self.reset()
+        self.bg_filename = None
         try:
             self.beatmap = OsuBeatmapReader(in_file)
         except OsuGameTypeException:
@@ -65,7 +66,7 @@ class OsuManiaToBMSParser:
         output = os.path.join(out_dir, bms_filename)
         OsuManiaToBMSParser._out_file = codecs.open(output, "w", "shiftjis", errors="replace")
 
-        self.write_buffer(self.create_header(self.beatmap))
+        self.write_buffer(self.create_header())
         music_start_param = self.music_start_time(self.beatmap)
         self.get_next_measure(music_start_param[0], music_start_param[1], self.beatmap)
 
@@ -74,13 +75,19 @@ class OsuManiaToBMSParser:
         file = os.path.dirname(in_file)
         if OsuManiaToBMSParser._convertion_options["BG"] and self.beatmap.stagebg is not None and \
                 os.path.isfile(os.path.join(file, self.beatmap.stagebg)):
-            om2bms.image_resizer.black_background_thumbnail(os.path.join(file, self.beatmap.stagebg))
+            # om2bms.image_resizer.black_background_thumbnail(os.path.join(file, self.beatmap.stagebg))
+            self.bg_filename = os.path.join(file, self.beatmap.stagebg)
+
+    def get_bg(self):
+        """
+        Returns bg filename
+        """
+        return self.bg_filename
 
     def reset(self):
         """
         Resets class variables
         """
-        OsuMania.float_bpm = []
         OsuManiaToBMSParser._out_file = None
         OsuBeatmapReader._latest_tp_index = 0
         OsuBeatmapReader._latest_noninherited_tp_index = 0
@@ -110,6 +117,11 @@ class OsuManiaToBMSParser:
             """
             Generalized expander for non upper number of 3 or 4 measures.
             """
+            def within_offset(num, sum__, offset):
+                """
+                return true if within
+                """
+                return int(ms_per_measure * num) - 1 < ms_per_measure * (sum__ + offset) < int(ms_per_measure * num) + 1
             done = False
             denominator = meter
             sum_ = Fraction(1, meter)
@@ -117,8 +129,7 @@ class OsuManiaToBMSParser:
                 sum_ += Fraction(1, denominator)
             iterations = 0
             while iterations < 6:
-                if int(ms_per_measure * n) - 1 < ms_per_measure * sum_ < int(ms_per_measure * n) + 2 or \
-                        round(n, 5) == round(float(sum_), 5):
+                if within_offset(n, sum_, 0) or round(n, 5) == round(float(sum_), 5):
                     done = True
                     break
                 if float(sum_) > n:
@@ -130,20 +141,18 @@ class OsuManiaToBMSParser:
                 iterations += 1
             # pad with maxs
             while not done:
-                if int(ms_per_measure * n) - 1 < ms_per_measure * sum_ < int(ms_per_measure * n) + 1:
+                if within_offset(n, sum_, 0):
                     break
                 prev_error = abs(n - sum_)
                 if sum_ > n:
-                    if int(ms_per_measure * n) - 1 < ms_per_measure * (sum_ - Fraction(1, end)) < int(
-                            ms_per_measure * n) + 1:
+                    if within_offset(n, sum_, -Fraction(1, end)):
                         sum_ -= Fraction(1, end)
                         break
                     elif abs(n - (prev_error - Fraction(1, end))) > sum_ - Fraction(1, end):
                         break
                     sum_ -= Fraction(1, end)
                 elif sum_ < n:
-                    if int(ms_per_measure * n) - 1 < ms_per_measure * (sum_ + Fraction(1, end)) < int(
-                            ms_per_measure * n) + 1:
+                    if within_offset(n, sum_, Fraction(1, end)):
                         sum_ += Fraction(1, end)
                         break
                     elif abs(n - (prev_error + Fraction(1, end))) < sum_ - Fraction(1, end):
@@ -248,35 +257,35 @@ class OsuManiaToBMSParser:
         """
         Retrieves information for each measure.
         """
-        def add_to_measure(current_measure, hitobj):
+        def add_to_measure(current_measure_, hitobjj_):
             """
             Adds hitobj to measure
             """
-            if isinstance(hitobj, OsuManiaNote):
-                column = hitobj.mania_column
+            if isinstance(hitobjj_, OsuManiaNote):
+                column = hitobjj_.mania_column
                 bmscolumn = OsuManiaToBMSParser._mania_note_to_channel[column]
-                if bmscolumn not in current_measure:
-                    current_measure[OsuManiaToBMSParser._mania_note_to_channel[column]] = [hitobj]
+                if bmscolumn not in current_measure_:
+                    current_measure_[OsuManiaToBMSParser._mania_note_to_channel[column]] = [hitobjj_]
                 else:
-                    current_measure[OsuManiaToBMSParser._mania_note_to_channel[column]].append(hitobj)
-            elif isinstance(hitobj, OsuManiaLongNote):
-                column = hitobj.mania_column
+                    current_measure_[OsuManiaToBMSParser._mania_note_to_channel[column]].append(hitobjj_)
+            elif isinstance(hitobjj_, OsuManiaLongNote):
+                column = hitobjj_.mania_column
                 bmscolumn = OsuManiaToBMSParser._mania_ln_to_channel[column]
-                if bmscolumn not in current_measure:
-                    current_measure[OsuManiaToBMSParser._mania_ln_to_channel[column]] = [hitobj]
+                if bmscolumn not in current_measure_:
+                    current_measure_[OsuManiaToBMSParser._mania_ln_to_channel[column]] = [hitobjj_]
                 else:
-                    current_measure[OsuManiaToBMSParser._mania_ln_to_channel[column]].append(hitobj)
-            elif isinstance(hitobj, OsuBGSoundEvent):
+                    current_measure_[OsuManiaToBMSParser._mania_ln_to_channel[column]].append(hitobjj_)
+            elif isinstance(hitobjj_, OsuBGSoundEvent):
                 column = 1
-                if column not in current_measure:
-                    current_measure[column] = [hitobj]
+                if column not in current_measure_:
+                    current_measure_[column] = [hitobjj_]
                 else:
-                    current_measure[column].append(hitobj)
-            elif isinstance(hitobj, OsuTimingPoint):
-                if 0 not in current_measure:
-                    current_measure[0] = [hitobj]
+                    current_measure_[column].append(hitobjj_)
+            elif isinstance(hitobjj_, OsuTimingPoint):
+                if 0 not in current_measure_:
+                    current_measure_[0] = [hitobjj_]
                 else:
-                    current_measure[0] = [hitobj]
+                    current_measure_[0] = [hitobjj_]
 
         current_measure = {}
 
@@ -437,7 +446,7 @@ class OsuManiaToBMSParser:
                     if new_bpm <= 255 and isinstance(new_bpm, int):
                         bms_measure.create_bpm_change_line(new_bpm)
                     else:
-                        bms_measure.create_bpm_extended_change_line(new_bpm)
+                        bms_measure.create_bpm_extended_change_line(new_bpm, self.beatmap.float_bpm)
                 elif key == 1:
                     locations_ = sorted(locations, key=lambda x: x[0])
                     for i in range(len(locations)):
@@ -452,7 +461,7 @@ class OsuManiaToBMSParser:
 
             return bms_measure
 
-    def create_header(self, beatmap: OsuMania) -> List[str]:
+    def create_header(self) -> List[str]:
         """
         Makes everything before maindata field
         """
@@ -461,24 +470,25 @@ class OsuManiaToBMSParser:
         buffer.append("*---------------------- HEADER FIELD")
         buffer.append("")
         buffer.append("#PLAYER 1")
-        buffer.append("#GENRE " + beatmap.creator)
-        buffer.append("#TITLE " + beatmap.title_unicode)
-        buffer.append("#SUBTITLE " + beatmap.version)
-        buffer.append("#ARTIST " + beatmap.artist_unicode)
+        buffer.append("#GENRE " + self.beatmap.creator)
+        buffer.append("#TITLE " + self.beatmap.title_unicode)
+        buffer.append("#SUBTITLE " + self.beatmap.version)
+        buffer.append("#ARTIST " + self.beatmap.artist_unicode)
         # buffer.append("#SUBARTIST " + beatmap.artist)
-        buffer.append("#BPM " + str(int(calculate_bpm(beatmap.timing_points[0]))))
+        buffer.append("#BPM " + str(int(calculate_bpm(self.beatmap.timing_points[0]))))
         buffer.append("#DIFFICULTY " + "5")
         buffer.append("#RANK " + "3")
         buffer.append("")
-        for hs in beatmap.hitsound_names:
+        for hs in self.beatmap.hitsound_names:
             buffer.append("#WAV" + hs[0] + " " + str(hs[1]))
         buffer.append("")
-        if beatmap.stagebg is not None and OsuManiaToBMSParser._convertion_options["BG"]:
-            buffer.append("#BMP01 " + beatmap.stagebg)
+        if self.beatmap.stagebg is not None and OsuManiaToBMSParser._convertion_options["BG"]:
+            buffer.append("#BMP01 " + self.beatmap.stagebg)
             buffer.append("")
-        if beatmap.float_bpm:
-            for e in OsuMania.float_bpm:
+        if len(self.beatmap.float_bpm) > 0:
+            for e in self.beatmap.float_bpm:
                 buffer.append("#BPM" + str(e[0]) + " " + str(e[1]))
+            buffer.append("")
         # BGM FIELD
         buffer.append("*---------------------- EXPANSION FIELD")
         buffer.append("")
@@ -486,7 +496,7 @@ class OsuManiaToBMSParser:
         buffer.append("*---------------------- MAIN DATA FIELD")
         buffer.append("")
         buffer.append("")
-        if beatmap.stagebg is not None and OsuManiaToBMSParser._convertion_options["BG"]:
+        if self.beatmap.stagebg is not None and OsuManiaToBMSParser._convertion_options["BG"]:
             buffer.append("#00004:01")
 
         return buffer

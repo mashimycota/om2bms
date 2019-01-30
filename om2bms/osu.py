@@ -147,10 +147,15 @@ class OsuBeatmapReader:
             tp.sample_index = int(line_separated[4])
             tp.volume = int(line_separated[5])
             tp.kiai_mode = False if line_separated[7] == 0 else True
-            if len(beatmap.timing_points) > 0 and tp.time <= beatmap.timing_points[-1].time + 1:
+            # delete previous tp if new tp causes old tp to last only a few ms
+            if len(beatmap.timing_points) > 0 and tp.time <= beatmap.timing_points[-1].time + 2 and not tp.inherited:
                 del beatmap.timing_points[-1]
             if tp.inherited:
                 tp.ms_per_beat = get_ms_per_beat(float(line_separated[1]), beatmap)
+                prev_tp = beatmap.timing_points[-1]
+                if len(beatmap.timing_points) > 0 and tp.time <= prev_tp.time + 1 and \
+                        tp.sample_set != prev_tp.sample_set and tp.sample_index != prev_tp.sample_index:
+                    del beatmap.timing_points[-1]
             else:
                 tp.ms_per_beat = float(line_separated[1])
                 bpm = calculate_bpm(tp)

@@ -5,7 +5,6 @@ from om2bms.exceptions import BMSHitSoundException
 
 class OsuMania:
     """Class containing information from .osu file"""
-    float_bpm = []
 
     def __init__(self):
         # general
@@ -27,6 +26,7 @@ class OsuMania:
         self.key_count = None  # originally circle size
         self.od = None
 
+        self.float_bpm = []
         self.timing_points = []
         self.hit_objects = []
         self.sample_objects = []
@@ -41,12 +41,12 @@ class OsuMania:
 
     def parse_float_bpm(self, bpm: float):
         """
-        aa
+        Parse float bpm into (INDEX, BPM)
         """
-        for e in OsuMania.float_bpm:
+        for e in self.float_bpm:
             if e[1] == bpm:
                 return
-        OsuMania.float_bpm.append((get_current_hs_count(len(OsuMania.float_bpm) + 1), bpm))
+        self.float_bpm.append((get_current_hs_count(len(self.float_bpm) + 1), bpm))
 
 
 class OsuTimingPoint:
@@ -255,12 +255,12 @@ class BMSMeasure:
         """
         self.lines.append(BMSMainDataLine("03", 1, {0: str(hex(bpm))[2:4].upper().zfill(2)}, [0], self.measure_number))
 
-    def create_bpm_extended_change_line(self, bpm: Union[int, float]):
+    def create_bpm_extended_change_line(self, bpm: Union[int, float], float_bpm_arr):
         """
         Channel 8 bpm change. Takes real number.
         """
         tup = (None, None)
-        for e in OsuMania.float_bpm:
+        for e in float_bpm_arr:
             if e[1] == bpm:
                 tup = e
         self.lines.append(BMSMainDataLine("08", 1, {0: str(tup[0])}, [0], self.measure_number))
