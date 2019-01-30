@@ -7,6 +7,31 @@ from om2bms.exceptions import BMSMaxMeasuresException
 from om2bms.image_resizer import black_background_thumbnail
 
 import om2bms.om_to_bms
+import multiprocessing
+
+
+def start_convertion(filedir_, output_file_dir_, file_, bg_option, bg_list_):
+    """
+    Returns bg filename
+    """
+    try:
+        converted_file = om2bms.om_to_bms.OsuManiaToBMSParser(filedir_, output_file_dir_, file_)
+        if not converted_file.failed and bg_option:
+            bg_list_.append(converted_file.get_bg())
+    except BMSMaxMeasuresException as e:
+        print(e)
+
+
+def convert_bg_list(bg_list_) -> None:
+    """
+    Converts all images in img_list
+    """
+    seen = []
+    for bg in bg_list_:
+        if bg is not None and bg not in seen:
+            black_background_thumbnail(bg)
+            seen.append(bg)
+
 
 if __name__ == "__main__":
 
@@ -101,24 +126,42 @@ if __name__ == "__main__":
             os.makedirs(output_file_dir)
 
         # convert beatmap
-        bg_list = []
+        # bg_list = []
+        # for file in os.listdir(unzip_dir):
+        #     if file.endswith(".osu"):
+        #         filedir = os.path.join(unzip_dir, file)
+        #         try:
+        #             convert = om2bms.om_to_bms.OsuManiaToBMSParser(filedir, output_file_dir, file)
+        #             bg_list.append(convert.get_bg())
+        #         except BMSMaxMeasuresException as e:
+        #             print(e)
+        #             continue
+        processes = []
+        manager = multiprocessing.Manager()
+        bg_list = manager.list()
         for file in os.listdir(unzip_dir):
             if file.endswith(".osu"):
                 filedir = os.path.join(unzip_dir, file)
-                try:
-                    convert = om2bms.om_to_bms.OsuManiaToBMSParser(filedir, output_file_dir, file)
-                    bg_list.append(convert.get_bg())
-                except BMSMaxMeasuresException as e:
-                    print(e)
-                    continue
+                p = multiprocessing.Process(target=start_convertion,
+                                            args=(filedir, output_file_dir, file, args.bg, bg_list))
+                processes.append(p)
+
+        for p in processes:
+            p.start()
+
+        for p in processes:
+            p.join()
 
         # convert bg
-        if args.hitsound:
-            seen = []
-            for bg in bg_list:
-                if bg is not None and bg not in seen:
-                    black_background_thumbnail(bg)
-                    seen.append(bg)
+        # if args.hitsound:
+        #     seen = []
+        #     for bg in bg_list:
+        #         if bg is not None and bg not in seen:
+        #             black_background_thumbnail(bg)
+        #             seen.append(bg)
+        if args.bg:
+            print("Converting BG...")
+            convert_bg_list(bg_list)
 
         # move files to output directory
         for f in os.listdir(unzip_dir):

@@ -51,11 +51,14 @@ class OsuManiaToBMSParser:
     def __init__(self, in_file, out_dir, filename):
         self.reset()
         self.bg_filename = None
+        self.failed = False
         try:
             self.beatmap = OsuBeatmapReader(in_file)
         except OsuGameTypeException:
+            self.failed = True
             return
         except OsuParseException as e:
+            self.failed = True
             print(e)
             return
         print("\tConverting " + filename)
