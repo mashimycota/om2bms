@@ -22,7 +22,9 @@ from om2bms.exceptions import BMSMaxMeasuresException
 
 class OsuManiaToBMSParser:
     """
-    Where the magic happens.
+    in_file: path to osu file to convert
+    out_dir: directory to output the converted bms file
+    filename: the name to print to console when converting
     """
     _ms_to_inverse_note_values = {}
     _mania_note_to_channel = {
@@ -124,7 +126,7 @@ class OsuManiaToBMSParser:
                 """
                 return true if within
                 """
-                return int(ms_per_measure * num) - 1 < ms_per_measure * (sum__ + offset) < int(ms_per_measure * num) + 1
+                return int(ms_per_measure * num) - 1 < ms_per_measure * (sum__ + offset) < int(ms_per_measure * num) + 2
             done = False
             denominator = meter
             sum_ = Fraction(1, meter)
@@ -186,7 +188,7 @@ class OsuManiaToBMSParser:
             use_obj = True
         else:
             start_time = first_timing.time
-        # find first obj on down
+        # find first obj on down beat
         if use_obj:
             i = 0
             while beatmap.objects[i].time < first_timing.time:
@@ -194,13 +196,8 @@ class OsuManiaToBMSParser:
             start_time = beatmap.objects[i].time
         while start_time - ms_per_measure > 0:
             start_time -= ms_per_measure
-
-        if start_time > 0:
-            start_time_offset = ms_per_measure - start_time
-            if use_obj:
-                start_time_offset = ms_per_measure - start_time
-        else:
-            start_time_offset = abs(start_time)
+        # start_time_offset is the time from 0 ms to the first obj
+        start_time_offset = ms_per_measure - start_time if start_time > 0 else abs(start_time)
 
         mus_start_at_001 = True if first_object.time + ms_per_measure < ms_per_measure else False
 
