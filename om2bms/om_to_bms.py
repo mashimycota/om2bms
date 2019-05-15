@@ -1,5 +1,6 @@
 import codecs
 import os
+import re
 
 from typing import Union, List, Tuple, Dict
 from fractions import Fraction
@@ -68,6 +69,7 @@ class OsuManiaToBMSParser:
         self.beatmap = self.beatmap.get_parsed_beatmap()
 
         bms_filename = self.beatmap.title + " " + self.beatmap.version + ".bms"
+        bms_filename = re.sub('[\\/:"*?<>|]+', "", bms_filename)
         output = os.path.join(out_dir, bms_filename)
         OsuManiaToBMSParser._out_file = codecs.open(output, "w", "shiftjis", errors="replace")
 
