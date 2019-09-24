@@ -27,11 +27,21 @@ if __name__ == '__main__':
                         default=True,
                         help='Disables background conversion.')
 
+    parser.add_argument('-o', '--offset',
+                        default=0,
+                        type=int,
+                        help="Adjusts music start time by [offset] ms.")
+
     args = parser.parse_args()
 
     cwd = os.getcwd()
 
-    om2bms.om_to_bms.OsuManiaToBMSParser._convertion_options = {"HITSOUND": args.hitsound, "BG": args.bg}
-    convert = om2bms.om_to_bms.OsuManiaToBMSParser(args.in_file, os.getcwd(), args.in_file)
+    om2bms.om_to_bms.OsuManiaToBMSParser._convertion_options = {
+        "HITSOUND": args.hitsound,
+        "BG": args.bg,
+        "OFFSET": args.offset
+    }
+    convert = om2bms.om_to_bms.OsuManiaToBMSParser(
+        args.in_file, os.getcwd(), args.in_file)
     print("Done")
     exit(0)

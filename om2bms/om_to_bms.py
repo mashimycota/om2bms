@@ -201,6 +201,8 @@ class OsuManiaToBMSParser:
         # start_time_offset is the time from 0 ms to the first obj
         start_time_offset = ms_per_measure - start_time if start_time > 0 else abs(start_time)
 
+        start_time_offset += OsuManiaToBMSParser._convertion_options["OFFSET"]
+
         mus_start_at_001 = True if first_object.time + ms_per_measure < ms_per_measure else False
 
         sto_fraction = start_time_offset / ms_per_measure

@@ -67,6 +67,11 @@ if __name__ == "__main__":
                         help='Directory name to store output files in output path. '
                              'Default value is the .osz filename')
 
+    parser.add_argument('-o', '--offset',
+                        default=0,
+                        type=int,
+                        help="Adjusts music start time by [offset] ms.")
+
     args = parser.parse_args()
     cwd = os.getcwd()
 
@@ -97,8 +102,11 @@ if __name__ == "__main__":
     else:
         out_foldername = args.foldername
 
-    om2bms.om_to_bms.OsuManiaToBMSParser._convertion_options = {"HITSOUND": args.hitsound,
-                                                                "BG": args.bg}
+    om2bms.om_to_bms.OsuManiaToBMSParser._convertion_options = {
+        "HITSOUND": args.hitsound,
+        "BG": args.bg,
+        "OFFSET": args.offset
+    }
     unzip_dir = os.path.join(cwd, "unzip_dir")
     if not os.path.isdir(unzip_dir):
         os.makedirs(unzip_dir)
