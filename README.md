@@ -57,7 +57,7 @@ python om2bms.py -h
 
 ### Notes
 
-- There may be some offset issues (Use "-o" option to adjust offset)
+- There may be a global ~-5ms offset (Use "-o" option to adjust offset)
 - Tested with LR2
 - Does not support SV changes
 - Uses first timing point to estimate the first measure
