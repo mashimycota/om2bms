@@ -32,6 +32,12 @@ if __name__ == '__main__':
                         type=int,
                         help="Adjusts music start time by [offset] ms.")
 
+    parser.add_argument('-j', '--judge',
+                        default=3,
+                        type=int,
+                        help="Judge difficulty. Defaults to EASY. "
+                        "(3: EASY), (2: NORMAL), (1: HARD), (0: VERY HARD)")
+
     args = parser.parse_args()
 
     cwd = os.getcwd()
@@ -39,7 +45,8 @@ if __name__ == '__main__':
     om2bms.om_to_bms.OsuManiaToBMSParser._convertion_options = {
         "HITSOUND": args.hitsound,
         "BG": args.bg,
-        "OFFSET": args.offset
+        "OFFSET": args.offset,
+        "JUDGE": args.judge
     }
     convert = om2bms.om_to_bms.OsuManiaToBMSParser(
         args.in_file, os.getcwd(), args.in_file)

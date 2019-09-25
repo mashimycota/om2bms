@@ -481,7 +481,7 @@ class OsuManiaToBMSParser:
         # buffer.append("#SUBARTIST " + beatmap.artist)
         buffer.append("#BPM " + str(int(calculate_bpm(self.beatmap.timing_points[0]))))
         buffer.append("#DIFFICULTY " + "5")
-        buffer.append("#RANK " + "3")
+        buffer.append("#RANK " + str(OsuManiaToBMSParser._convertion_options["JUDGE"]))
         buffer.append("")
         for hs in self.beatmap.hitsound_names:
             buffer.append("#WAV" + hs[0] + " " + str(hs[1]))
