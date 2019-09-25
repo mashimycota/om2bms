@@ -57,11 +57,11 @@ python om2bms.py -h
 
 ### Notes
 
+- There may be some offset issues (Use "-o" option to adjust offset)
 - Tested with LR2
 - Does not support SV changes
 - Uses first timing point to estimate the first measure
 - Assumes timing points are always the start of a new measure
-- There may be some offset issues (no online offset)
 - If there are >1 hitsounds played in one note, only plays the hitsound with the highest bit
 
 [.osu file documentation](https://osu.ppy.sh/help/wiki/osu!_File_Formats/Osu_(file_format)).
