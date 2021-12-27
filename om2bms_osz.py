@@ -10,13 +10,20 @@ import om2bms.om_to_bms
 import multiprocessing
 
 
-def start_convertion(filedir_, output_file_dir_, file_, bg_option, bg_list_):
+def start_convertion(filedir_, output_file_dir_, file_, args, bg_list_):
     """
     Returns bg filename
     """
     try:
+        om2bms.om_to_bms.OsuManiaToBMSParser._convertion_options = {
+            "HITSOUND": args.hitsound,
+            "BG": args.bg,
+            "OFFSET": args.offset,
+            "JUDGE": args.judge
+        }
+        
         converted_file = om2bms.om_to_bms.OsuManiaToBMSParser(filedir_, output_file_dir_, file_)
-        if not converted_file.failed and bg_option:
+        if not converted_file.failed and args.bg:
             bg_list_.append(converted_file.get_bg())
     except BMSMaxMeasuresException as e:
         print(e)
@@ -107,13 +114,7 @@ if __name__ == "__main__":
         out_foldername = foldername
     else:
         out_foldername = args.foldername
-
-    om2bms.om_to_bms.OsuManiaToBMSParser._convertion_options = {
-        "HITSOUND": args.hitsound,
-        "BG": args.bg,
-        "OFFSET": args.offset,
-        "JUDGE": args.judge
-    }
+        
     unzip_dir = os.path.join(cwd, "unzip_dir")
     if not os.path.isdir(unzip_dir):
         os.makedirs(unzip_dir)
@@ -158,7 +159,7 @@ if __name__ == "__main__":
             if file.endswith(".osu"):
                 filedir = os.path.join(unzip_dir, file)
                 p = multiprocessing.Process(target=start_convertion,
-                                            args=(filedir, output_file_dir, file, args.bg, bg_list))
+                                            args=(filedir, output_file_dir, file, args, bg_list))
                 processes.append(p)
 
         for p in processes:
